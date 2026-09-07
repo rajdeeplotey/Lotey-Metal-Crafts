@@ -1,0 +1,1 @@
+import{i as r,a,s as n}from"./page-loader-CXXqLvGo.js";document.addEventListener("DOMContentLoaded",()=>{r(),a(),n(),document.querySelectorAll('a[href^="#"]').forEach(t=>{t.addEventListener("click",function(o){o.preventDefault();const e=document.querySelector(this.getAttribute("href"));e&&e.scrollIntoView({behavior:"smooth"})})})});
