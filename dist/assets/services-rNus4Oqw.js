@@ -1,0 +1,1 @@
+import{i as r,s as i}from"./smooth-scroll-CZdece9L.js";import{a as n}from"./tilt-D0j2BXFF.js";document.addEventListener("DOMContentLoaded",()=>{r(),i(),n(),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(o){o.preventDefault();const t=document.querySelector(this.getAttribute("href"));t&&t.scrollIntoView({behavior:"smooth"})})})});
