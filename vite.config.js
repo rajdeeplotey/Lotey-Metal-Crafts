@@ -11,7 +11,7 @@ export default defineConfig({
         about: resolve(__dirname, 'about.html'),
         services: resolve(__dirname, 'services.html'),
         gallery: resolve(__dirname, 'gallery.html'),
-        process: resolve(__dirname, 'process.html'),
+        // process: resolve(__dirname, 'process.html'), // Archived temporarily
         contact: resolve(__dirname, 'contact.html'),
       },
     },
