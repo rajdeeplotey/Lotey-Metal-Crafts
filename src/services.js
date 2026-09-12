@@ -60,8 +60,8 @@ function initChapterLightbox() {
     closeBtn.addEventListener('click', closeModal);
   }
 
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
+  modal.addEventListener('click', () => {
+    closeModal();
   });
 
   window.addEventListener('keydown', (e) => {

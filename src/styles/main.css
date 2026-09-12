@@ -1889,6 +1889,23 @@ h4,
   color: var(--text-dark);
 }
 
+/* Chapter Lightbox Pure Image Mode — ensure no text, caption, or buttons ever appear */
+.chapter-lightbox .lightbox-caption,
+.chapter-lightbox #lightbox-title,
+.chapter-lightbox #lightbox-meta,
+.chapter-lightbox #lightbox-inquire,
+.chapter-lightbox .btn,
+.chapter-lightbox .btn-whatsapp,
+.chapter-lightbox p,
+.chapter-lightbox h3 {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.chapter-lightbox .lightbox-img {
+  cursor: zoom-out;
+}
+
 .lightbox-close {
   position: absolute;
   top: 1.5rem;
