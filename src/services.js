@@ -23,9 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function initChapterLightbox() {
   const modal = document.getElementById('lightbox-modal');
   const modalImg = document.getElementById('lightbox-img');
-  const modalTitle = document.getElementById('lightbox-title');
-  const modalMeta = document.getElementById('lightbox-meta');
-  const modalInquire = document.getElementById('lightbox-inquire');
   const closeBtn = document.getElementById('lightbox-close');
   const cards = document.querySelectorAll('.material-chapter .tilt-card');
 
@@ -33,21 +30,10 @@ function initChapterLightbox() {
 
   function openModalForCard(card) {
     const img = card.querySelector('.tilt-card-img');
-    const chapterSection = card.closest('.material-chapter');
-    const submark = chapterSection?.querySelector('.submark-tag')?.innerText.trim() || '';
-    const title = chapterSection?.querySelector('h2')?.innerText.trim() || img?.alt || 'Master Fabrication';
-    const badge = card.querySelector('.tilt-card-badge')?.innerText.trim() || '';
-
     if (!img) return;
 
     modalImg.src = img.src;
-    modalImg.alt = img.alt || title;
-    modalTitle.innerText = submark ? `${submark}: ${title}` : title;
-    modalMeta.innerText = badge ? `${badge} • Master Engineering by Lotey Metalcrafts` : 'Lotey Metalcrafts Ludhiana';
-
-    if (modalInquire) {
-      modalInquire.href = `https://wa.me/917888909390?text=Hi%20Inderjit%20Ji,%20I'm%20interested%20in%20custom%20fabrication%20for%20${encodeURIComponent(title)}.`;
-    }
+    modalImg.alt = img.alt || 'Master Fabrication Full Image';
 
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
