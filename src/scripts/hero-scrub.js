@@ -37,12 +37,14 @@ export function initHeroScrollScrub() {
   const loaderFill = document.querySelector('.hero-loader-fill');
   const wordmark = document.querySelector('.hero-wordmark');
   const submark = document.querySelector('.hero-submark');
+  const scrollIndicator = document.querySelector('.hero-scroll-indicator');
 
   // Handle Reduced Motion
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Mobile vs Desktop frame setup
-  const isMobile = window.innerWidth < 768;
+  // Mobile vs Desktop frame setup, including rotated phone viewports
+  const isMobileViewport = () => window.innerWidth < 768 || (window.innerWidth < 900 && window.innerHeight < 600);
+  const isMobile = isMobileViewport();
   const activeConfig = isMobile ? CONFIG.mobile : CONFIG.desktop;
   const frameCount = activeConfig.frameCount;
 
@@ -73,6 +75,8 @@ export function initHeroScrollScrub() {
   // Responsive Canvas Sizing with Retina DPI scaling
   let lastWidth = 0;
   let lastHeight = 0;
+  let resizeRefreshFrame = null;
+  let mobileFrameActive = isMobile;
 
   function resizeCanvas() {
     const w = window.innerWidth;
@@ -82,12 +86,50 @@ export function initHeroScrollScrub() {
     lastHeight = h;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
-    canvas.style.width = `${w}px`;
-    canvas.style.height = `${h}px`;
+    const mobileFrame = isMobile || isMobileViewport();
+    mobileFrameActive = mobileFrame;
+    const availableWidth = Math.max(0, Math.min(w, document.documentElement.clientWidth || w) - 16);
+    const compactMobile = w < 900 && h < 600;
+    const availableHeight = Math.max(0, h - (compactMobile ? 160 : 32));
+    const frameWidth = mobileFrame ? Math.min(availableWidth, Math.round(availableHeight * (16 / 9))) : w;
+    const frameHeight = mobileFrame ? Math.round(frameWidth * (9 / 16)) : h;
+
+    canvas.width = Math.round(frameWidth * dpr);
+    canvas.height = Math.round(frameHeight * dpr);
+    canvas.style.width = `${frameWidth}px`;
+    canvas.style.height = `${frameHeight}px`;
+
+    if (mobileFrame) {
+      const maxFrameTop = Math.max(16, h - frameHeight - (compactMobile ? 100 : 16));
+      const frameTop = Math.min(Math.max(80, Math.round(h * 0.29)), maxFrameTop);
+      canvas.style.inset = 'auto';
+      canvas.style.left = '50%';
+      canvas.style.top = `${frameTop + (frameHeight / 2)}px`;
+      canvas.style.transform = 'translate(-50%, -50%) translateZ(0)';
+      if (scrollIndicator) {
+        scrollIndicator.style.top = `${frameTop + frameHeight + 20}px`;
+        scrollIndicator.style.bottom = 'auto';
+      }
+    } else {
+      canvas.style.left = '';
+      canvas.style.top = '';
+      canvas.style.inset = '';
+      canvas.style.transform = 'translateZ(0)';
+      if (scrollIndicator) {
+        scrollIndicator.style.top = '';
+        scrollIndicator.style.bottom = '';
+      }
+    }
 
     renderFrame(Math.round(sequenceState.frame));
+
+    if (ScrollTrigger.getAll().length) {
+      if (resizeRefreshFrame) cancelAnimationFrame(resizeRefreshFrame);
+      resizeRefreshFrame = requestAnimationFrame(() => {
+        resizeRefreshFrame = null;
+        ScrollTrigger.refresh();
+      });
+    }
   }
 
   window.addEventListener('resize', resizeCanvas);
@@ -103,7 +145,7 @@ export function initHeroScrollScrub() {
 
     const hRatio = cw / iw;
     const vRatio = ch / ih;
-    const ratio = Math.max(hRatio, vRatio);
+    const ratio = mobileFrameActive ? Math.min(hRatio, vRatio) : Math.max(hRatio, vRatio);
 
     const drawW = Math.ceil(iw * ratio);
     const drawH = Math.ceil(ih * ratio);
@@ -322,7 +364,7 @@ export function initHeroScrollScrub() {
     }, 0.5);
   }
 
-  const indicator = document.querySelector('.hero-scroll-indicator');
+  const indicator = scrollIndicator;
   if (indicator) {
     scrubTl.to(indicator, {
       opacity: 0,
