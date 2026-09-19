@@ -41,6 +41,62 @@ export function initHeroScrollScrub() {
   const heroBackdrop = document.querySelector('.hero-backdrop-container');
   const heroViewport = document.querySelector('.hero-branding-sticky');
   const heroBrandingSection = document.querySelector('.hero-branding-section');
+  const heroDebugEnabled = new URLSearchParams(window.location.search).get('heroDebug') === '1';
+
+  function getRectSnapshot(element) {
+    if (!element) return null;
+    const rect = element.getBoundingClientRect();
+    return {
+      top: Math.round(rect.top * 100) / 100,
+      bottom: Math.round(rect.bottom * 100) / 100,
+      left: Math.round(rect.left * 100) / 100,
+      right: Math.round(rect.right * 100) / 100,
+      width: Math.round(rect.width * 100) / 100,
+      height: Math.round(rect.height * 100) / 100
+    };
+  }
+
+  function logHeroDiagnostics(label, extra = {}) {
+    if (!heroDebugEnabled) return;
+    const viewport = window.visualViewport;
+    const viewportSnapshot = {
+      innerWidth: window.innerWidth,
+      innerHeight: window.innerHeight,
+      outerWidth: window.outerWidth,
+      outerHeight: window.outerHeight,
+      clientWidth: document.documentElement.clientWidth,
+      clientHeight: document.documentElement.clientHeight,
+      visualWidth: viewport?.width ?? null,
+      visualHeight: viewport?.height ?? null,
+      visualOffsetTop: viewport?.offsetTop ?? null,
+      visualOffsetLeft: viewport?.offsetLeft ?? null,
+      devicePixelRatio: window.devicePixelRatio
+    };
+    const snapshot = {
+      label,
+      timestamp: new Date().toISOString(),
+      viewport: viewportSnapshot,
+      hero: getRectSnapshot(document.querySelector('#hero-scroll-wrapper')),
+      frameContainer: getRectSnapshot(heroBackdrop),
+      frameImage: getRectSnapshot(canvas),
+      brandingSection: getRectSnapshot(heroBrandingSection),
+      brandingSticky: getRectSnapshot(heroViewport),
+      scrollIndicator: getRectSnapshot(scrollIndicator),
+      canvasBitmap: { width: canvas.width, height: canvas.height },
+      transforms: {
+        canvas: getComputedStyle(canvas).transform,
+        frameContainer: heroBackdrop ? getComputedStyle(heroBackdrop).transform : null,
+        brandingSticky: heroViewport ? getComputedStyle(heroViewport).transform : null
+      },
+      ...extra
+    };
+    window.__loteyHeroDebugHistory = [...(window.__loteyHeroDebugHistory || []), snapshot];
+    console.groupCollapsed(`[Lotey hero debug] ${label}`);
+    console.table(viewportSnapshot);
+    console.log(snapshot);
+    console.log(`[Lotey hero debug JSON] ${JSON.stringify(snapshot)}`);
+    console.groupEnd();
+  }
 
   // Handle Reduced Motion
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -83,6 +139,9 @@ export function initHeroScrollScrub() {
     if (!hasFirstFrameLoaded) {
       lastDrawnImage = fallbackImage;
       drawToCanvas(fallbackImage);
+      logHeroDiagnostics('first-frame-loaded', {
+        image: { width: fallbackImage.naturalWidth, height: fallbackImage.naturalHeight }
+      });
     }
   };
 
@@ -148,6 +207,7 @@ export function initHeroScrollScrub() {
     }
 
     renderFrame(Math.round(sequenceState.frame));
+    logHeroDiagnostics('resize', { frame: Math.round(sequenceState.frame), mobileFrame });
 
     if (ScrollTrigger.getAll().length) {
       if (resizeRefreshFrame) cancelAnimationFrame(resizeRefreshFrame);
@@ -160,10 +220,16 @@ export function initHeroScrollScrub() {
 
   window.addEventListener('resize', resizeCanvas);
   window.visualViewport?.addEventListener('resize', resizeCanvas);
+  if (heroDebugEnabled) {
+    window.addEventListener('load', () => logHeroDiagnostics('window-load', { fonts: document.fonts?.status }));
+    document.fonts?.ready.then(() => logHeroDiagnostics('fonts-ready', { fonts: document.fonts.status }));
+    window.visualViewport?.addEventListener('resize', () => logHeroDiagnostics('visual-viewport-resize'));
+  }
   if (heroViewport && 'ResizeObserver' in window) {
     new ResizeObserver(resizeCanvas).observe(heroViewport);
   }
   resizeCanvas();
+  logHeroDiagnostics('initialized', { fonts: document.fonts?.status });
 
   // Draw image to canvas with cover fit (no clearRect to prevent 1-frame blanking)
   function drawToCanvas(img) {
@@ -358,6 +424,14 @@ export function initHeroScrollScrub() {
     pinSpacing: false,
     anticipatePin: 1
   });
+  logHeroDiagnostics('backdrop-scrolltrigger-created', {
+    scrollTriggers: ScrollTrigger.getAll().map((trigger) => ({
+      start: trigger.start,
+      end: trigger.end,
+      pin: Boolean(trigger.pin),
+      pinSpacing: trigger.vars.pinSpacing
+    }))
+  });
 
   // Scrub the frame sequence and branding reveal during the branding stage
   // Responsive scrub (0.15s) provides immediate responsiveness when reversing direction
@@ -402,4 +476,13 @@ export function initHeroScrollScrub() {
       ease: 'power1.out'
     }, 0.05);
   }
+
+  logHeroDiagnostics('sequence-scrolltrigger-created', {
+    scrollTriggers: ScrollTrigger.getAll().map((trigger) => ({
+      start: trigger.start,
+      end: trigger.end,
+      pin: Boolean(trigger.pin),
+      pinSpacing: trigger.vars.pinSpacing
+    }))
+  });
 }
