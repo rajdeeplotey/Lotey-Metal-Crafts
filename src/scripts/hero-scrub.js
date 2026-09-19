@@ -79,6 +79,8 @@ export function initHeroScrollScrub() {
       hero: getRectSnapshot(document.querySelector('#hero-scroll-wrapper')),
       frameContainer: getRectSnapshot(heroBackdrop),
       frameImage: getRectSnapshot(canvas),
+      wordmark: getRectSnapshot(wordmark),
+      submark: getRectSnapshot(submark),
       brandingSection: getRectSnapshot(heroBrandingSection),
       brandingSticky: getRectSnapshot(heroViewport),
       scrollIndicator: getRectSnapshot(scrollIndicator),
@@ -86,7 +88,10 @@ export function initHeroScrollScrub() {
       transforms: {
         canvas: getComputedStyle(canvas).transform,
         frameContainer: heroBackdrop ? getComputedStyle(heroBackdrop).transform : null,
-        brandingSticky: heroViewport ? getComputedStyle(heroViewport).transform : null
+        brandingSticky: heroViewport ? getComputedStyle(heroViewport).transform : null,
+        overlay: getComputedStyle(document.querySelector('.hero-overlay')).transform,
+        wordmark: wordmark ? getComputedStyle(wordmark).transform : null,
+        submark: submark ? getComputedStyle(submark).transform : null
       },
       ...extra
     };
@@ -429,7 +434,8 @@ export function initHeroScrollScrub() {
       start: trigger.start,
       end: trigger.end,
       pin: Boolean(trigger.pin),
-      pinSpacing: trigger.vars.pinSpacing
+      pinSpacing: trigger.vars.pinSpacing,
+      trigger: trigger.trigger?.className || trigger.trigger?.id || null
     }))
   });
 
@@ -482,7 +488,8 @@ export function initHeroScrollScrub() {
       start: trigger.start,
       end: trigger.end,
       pin: Boolean(trigger.pin),
-      pinSpacing: trigger.vars.pinSpacing
+      pinSpacing: trigger.vars.pinSpacing,
+      trigger: trigger.trigger?.className || trigger.trigger?.id || null
     }))
   });
 }

@@ -2319,6 +2319,7 @@ h4,
   }
 
   .hero-branding-sticky {
+    position: fixed;
     height: 100svh;
     height: 100dvh;
   }
