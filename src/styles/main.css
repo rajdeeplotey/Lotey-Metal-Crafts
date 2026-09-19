@@ -436,7 +436,7 @@ h4,
 .hero-backdrop-scrim {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, rgba(20, 19, 18, 0.45) 0%, rgba(20, 19, 18, 0.8) 100%);
+  background: radial-gradient(circle at center, rgba(20, 19, 18, 0.52) 0%, rgba(20, 19, 18, 0.84) 100%);
   pointer-events: none;
   z-index: 2;
 }
