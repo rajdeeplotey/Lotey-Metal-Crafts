@@ -38,12 +38,26 @@ export function initHeroScrollScrub() {
   const wordmark = document.querySelector('.hero-wordmark');
   const submark = document.querySelector('.hero-submark');
   const scrollIndicator = document.querySelector('.hero-scroll-indicator');
+  const heroBackdrop = document.querySelector('.hero-backdrop-container');
+  const heroViewport = document.querySelector('.hero-branding-sticky');
+  const heroBrandingSection = document.querySelector('.hero-branding-section');
 
   // Handle Reduced Motion
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Mobile vs Desktop frame setup, including rotated phone viewports
-  const isMobileViewport = () => window.innerWidth < 768 || (window.innerWidth < 900 && window.innerHeight < 600);
+  function getViewportSize() {
+    const viewport = window.visualViewport;
+    return {
+      width: Math.round(viewport?.width || window.innerWidth),
+      height: Math.round(viewport?.height || window.innerHeight)
+    };
+  }
+
+  const isMobileViewport = () => {
+    const { width, height } = getViewportSize();
+    return width < 768 || (width < 900 && height < 600);
+  };
   const isMobile = isMobileViewport();
   const activeConfig = isMobile ? CONFIG.mobile : CONFIG.desktop;
   const frameCount = activeConfig.frameCount;
@@ -79,8 +93,7 @@ export function initHeroScrollScrub() {
   let mobileFrameActive = isMobile;
 
   function resizeCanvas() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const { width: w, height: h } = getViewportSize();
     if (w === lastWidth && h === lastHeight) return;
     lastWidth = w;
     lastHeight = h;
@@ -102,6 +115,13 @@ export function initHeroScrollScrub() {
     if (mobileFrame) {
       const maxFrameTop = Math.max(16, h - frameHeight - (compactMobile ? 100 : 16));
       const frameTop = Math.min(Math.max(80, Math.round(h * 0.29)), maxFrameTop);
+      const mobileViewportHeight = `${h}px`;
+      if (heroBackdrop) {
+        heroBackdrop.style.height = mobileViewportHeight;
+        heroBackdrop.style.marginBottom = `-${mobileViewportHeight}`;
+      }
+      if (heroViewport) heroViewport.style.height = mobileViewportHeight;
+      if (heroBrandingSection) heroBrandingSection.style.height = `${Math.round(h * 2.5)}px`;
       canvas.style.inset = 'auto';
       canvas.style.left = '50%';
       canvas.style.top = `${frameTop + (frameHeight / 2)}px`;
@@ -111,6 +131,12 @@ export function initHeroScrollScrub() {
         scrollIndicator.style.bottom = 'auto';
       }
     } else {
+      if (heroBackdrop) {
+        heroBackdrop.style.height = '';
+        heroBackdrop.style.marginBottom = '';
+      }
+      if (heroViewport) heroViewport.style.height = '';
+      if (heroBrandingSection) heroBrandingSection.style.height = '';
       canvas.style.left = '';
       canvas.style.top = '';
       canvas.style.inset = '';
@@ -133,6 +159,10 @@ export function initHeroScrollScrub() {
   }
 
   window.addEventListener('resize', resizeCanvas);
+  window.visualViewport?.addEventListener('resize', resizeCanvas);
+  if (heroViewport && 'ResizeObserver' in window) {
+    new ResizeObserver(resizeCanvas).observe(heroViewport);
+  }
   resizeCanvas();
 
   // Draw image to canvas with cover fit (no clearRect to prevent 1-frame blanking)

@@ -2305,6 +2305,25 @@ h4,
   }
 }
 
+@media (max-width: 768px), (max-width: 899px) and (max-height: 599px) {
+  .hero-backdrop-container {
+    height: 100svh;
+    margin-bottom: -100svh;
+    height: 100dvh;
+    margin-bottom: -100dvh;
+  }
+
+  .hero-branding-section {
+    height: 250svh;
+    height: 250dvh;
+  }
+
+  .hero-branding-sticky {
+    height: 100svh;
+    height: 100dvh;
+  }
+}
+
 @media (max-width: 480px) {
   .gallery-masonry {
     columns: 1 100%;
