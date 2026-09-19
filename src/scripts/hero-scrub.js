@@ -39,6 +39,7 @@ export function initHeroScrollScrub() {
   const submark = document.querySelector('.hero-submark');
   const scrollIndicator = document.querySelector('.hero-scroll-indicator');
   const heroBackdrop = document.querySelector('.hero-backdrop-container');
+  const heroFrameContainer = document.querySelector('.hero-frame-container');
   const heroViewport = document.querySelector('.hero-branding-sticky');
   const heroBrandingSection = document.querySelector('.hero-branding-section');
   const heroDebugEnabled = new URLSearchParams(window.location.search).get('heroDebug') === '1';
@@ -78,6 +79,7 @@ export function initHeroScrollScrub() {
       viewport: viewportSnapshot,
       hero: getRectSnapshot(document.querySelector('#hero-scroll-wrapper')),
       frameContainer: getRectSnapshot(heroBackdrop),
+      frame: getRectSnapshot(heroFrameContainer),
       frameImage: getRectSnapshot(canvas),
       wordmark: getRectSnapshot(wordmark),
       submark: getRectSnapshot(submark),
@@ -88,6 +90,7 @@ export function initHeroScrollScrub() {
       transforms: {
         canvas: getComputedStyle(canvas).transform,
         frameContainer: heroBackdrop ? getComputedStyle(heroBackdrop).transform : null,
+        frame: heroFrameContainer ? getComputedStyle(heroFrameContainer).transform : null,
         brandingSticky: heroViewport ? getComputedStyle(heroViewport).transform : null,
         overlay: getComputedStyle(document.querySelector('.hero-overlay')).transform,
         wordmark: wordmark ? getComputedStyle(wordmark).transform : null,
@@ -173,8 +176,8 @@ export function initHeroScrollScrub() {
 
     canvas.width = Math.round(frameWidth * dpr);
     canvas.height = Math.round(frameHeight * dpr);
-    canvas.style.width = `${frameWidth}px`;
-    canvas.style.height = `${frameHeight}px`;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
 
     if (mobileFrame) {
       const maxFrameTop = Math.max(16, h - frameHeight - (compactMobile ? 100 : 16));
@@ -186,10 +189,17 @@ export function initHeroScrollScrub() {
       }
       if (heroViewport) heroViewport.style.height = mobileViewportHeight;
       if (heroBrandingSection) heroBrandingSection.style.height = `${Math.round(h * 2.5)}px`;
-      canvas.style.inset = 'auto';
-      canvas.style.left = '50%';
-      canvas.style.top = `${frameTop + (frameHeight / 2)}px`;
-      canvas.style.transform = 'translate(-50%, -50%) translateZ(0)';
+      if (heroFrameContainer) {
+        heroFrameContainer.style.width = `${frameWidth}px`;
+        heroFrameContainer.style.height = `${frameHeight}px`;
+        heroFrameContainer.style.left = '50%';
+        heroFrameContainer.style.top = `${frameTop + (frameHeight / 2)}px`;
+        heroFrameContainer.style.transform = 'translate(-50%, -50%) translateZ(0)';
+      }
+      canvas.style.inset = '0';
+      canvas.style.left = '';
+      canvas.style.top = '';
+      canvas.style.transform = 'translateZ(0)';
       if (scrollIndicator) {
         scrollIndicator.style.top = `${frameTop + frameHeight + 20}px`;
         scrollIndicator.style.bottom = 'auto';
@@ -201,9 +211,16 @@ export function initHeroScrollScrub() {
       }
       if (heroViewport) heroViewport.style.height = '';
       if (heroBrandingSection) heroBrandingSection.style.height = '';
+      if (heroFrameContainer) {
+        heroFrameContainer.style.width = '';
+        heroFrameContainer.style.height = '';
+        heroFrameContainer.style.left = '';
+        heroFrameContainer.style.top = '';
+        heroFrameContainer.style.transform = '';
+      }
       canvas.style.left = '';
       canvas.style.top = '';
-      canvas.style.inset = '';
+      canvas.style.inset = '0';
       canvas.style.transform = 'translateZ(0)';
       if (scrollIndicator) {
         scrollIndicator.style.top = '';
